@@ -1,0 +1,8 @@
+secret.tf
+.terraform.lock.hcl
+.terraform/
+tfplan
+VULTR_SSH_PRIVATE_KEY
+VULTR_SSH_PUBLIC_KEY
+vultr_*.json
+tfplan-destroy
