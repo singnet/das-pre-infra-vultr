@@ -124,6 +124,11 @@ sudo cat /var/lib/faasd/secrets/basic-auth-password
 faas-cli login -u admin -p password
 ```
 
+copy the docker config auth to faas config auth:
+```
+sudo cp ~/.docker/config.json /var/lib/faasd/.docker/config.json
+```
+
 up functions:
 ```
 faas-cli up -f das-function.yml

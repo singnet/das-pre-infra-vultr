@@ -10,6 +10,7 @@ set -ex
 git clone https://github.com/openfaas/faasd --depth=1
 cd faasd
 ./hack/install.sh
+mkdir -p /var/lib/faasd/.docker/
 EOF
 
 chmod +x install-openfaas.sh
