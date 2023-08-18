@@ -1,0 +1,40 @@
+---
+name: Provisioning Infrastructure
+on:
+  push:
+    branches:
+      - master
+jobs:
+  validation:
+    name: Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hashicorp/setup-terraform@v2
+      - name: Check and validate terraform configuration
+        run: |-
+          terraform init
+          terraform fmt -check -diff -recursive .
+          terraform fmt -diff -recursive .
+          terraform validate
+
+  tag:
+    name: Tag
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bump version and push tag
+        id: tag
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          release_branches: master
+      - name: Create a release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.tag.outputs.new_tag }}
+          name: Release ${{ steps.tag.outputs.new_tag }}
+          body: ${{ steps.tag.outputs.changelog }}
+    outputs:
+      GIT_TAG: ${{ steps.tag.outputs.new_tag }}
+      CHANGELOG: ${{ steps.tag.outputs.changelog }}
+      RELEASE_TYPE: ${{ steps.tag.outputs.release_type }}
