@@ -9,12 +9,12 @@ on:
 
 jobs:
   tag:
-    uses: levisingularity/versioning/.github/workflows/action.yml@master
+    uses: singnet/das-scripts-pipeline/.github/workflows/action.yml@master
     with:
       version: ${{ github.event.inputs.version }}
       version-strategy: bump-version-from-variable-value
-      job-image-namespace: rafaellevissa
-      job-image-version-semver: v0.1.0
+      job-image-namespace: trueagi
+      job-image-version-semver: semantic-versioning
       main-branch: master
       version-tag-regex-pattern: /^v\d+\.\d+\.\d+$/
       version-require-confirmation: "true"
