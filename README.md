@@ -1,11 +1,6 @@
-# das-pre-infra-vultr
-Scripts/assets to provision and instantiate required hardware in Vultr
+# DAS-infra-stack-servless
 
-## Resources:
-- Instances on Vultr cloud
-
-## Objective:
-Create instances on Vultr cloud to deploy the Redis DB, Mongo DB and functions on OpenFaas server. The instances in production env are a Bare Metal Type
+Serverless infra with Vultr, OpenFaaS, Ansible, Terraform.
 
 ## Configuration
 
@@ -85,51 +80,66 @@ terraform plan -destroy -var-file=config.tfvars -out tfplan-destroy
 terraform apply tfplan-destroy
 ```
 
+## Faas registry
+
+### Prepare your Docker registry (if using AWS ECR)
+
+```
+faas-cli registry-login --ecr --region <your-aws-region> --account-id <your-account-id>
+```
+
+https://docs.openfaas.com/reference/private-registries/
+
 ## Configure OpenFaas server before up the stack.yml
 
-create ssh:
+add the user to Docker group and create ssh:
+
 ```
+sudo usermod -aG docker $USER
 ssh-keygen -t rsa
 cat ~/.ssh/id_rsa.pub
 ```
+
 add the public key on github
 
 Clonning repositories:
+
 ```
 git clone link-of-function-repo
 git clone git@github.com:singnet/das-infra-stack-vultr.git
 ```
 
 configure aws, putting the credential to aws:
-```
+'''
 aws configure
-```
+'''
 
-Connecting docker on aws ecr registry (if other private registry, see faasd documentation):
-```
+Connecting docker on aws ecr registry:
+'''
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 038760728819.dkr.ecr.us-east-1.amazonaws.com/das
-```
+'''
 
 generating credentials folder to faas stack:
+
 ```
 cd DAS-deployment-openFaas
-
 faas-cli registry-login --ecr --region us-east-1 --account-id 038760728819
 ```
 
 login to faas gateway:
-```
+'''
 sudo cat /var/lib/faasd/secrets/basic-auth-password
-
 faas-cli login -u admin -p password
-```
+'''
 
 copy the docker config auth to faas config auth:
+
 ```
-sudo cp ~/.docker/config.json /var/lib/faasd/.docker/config.json
+cp ~/.docker/config.json /var/lib/faasd/.docker/config.json
 ```
 
 up functions:
+
 ```
 faas-cli up -f das-function.yml
 ```

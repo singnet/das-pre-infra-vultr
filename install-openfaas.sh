@@ -41,4 +41,5 @@ snap install aws-cli --classic
 EOF
 
 chmod +x install-aws-cli.sh
-./install-aws-cli.sh >> install-aws-cli.log 2>&1
+# ./install-aws-cli.sh >> install-aws-cli.log 2>&1
+
