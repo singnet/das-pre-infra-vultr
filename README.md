@@ -82,7 +82,7 @@ terraform apply tfplan-destroy
 
 ## Faas registry
 
-### Prepare your Docker registry (if using AWS ECR)
+### Prepare your Docker registry (if using AWS ECR) - (deprecated)
 
 ```
 faas-cli registry-login --ecr --region <your-aws-region> --account-id <your-account-id>
@@ -109,17 +109,17 @@ git clone link-of-function-repo
 git clone git@github.com:singnet/das-infra-stack-vultr.git
 ```
 
-configure aws, putting the credential to aws:
-'''
+configure aws, putting the credential to aws (deprecated):
+```
 aws configure
-'''
+```
 
-Connecting docker on aws ecr registry:
-'''
+Connecting docker on aws ecr registry (deprecated):
+```
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 038760728819.dkr.ecr.us-east-1.amazonaws.com/das
-'''
+```
 
-generating credentials folder to faas stack:
+generating credentials folder to faas stack (deprecated):
 
 ```
 cd DAS-deployment-openFaas
@@ -127,10 +127,10 @@ faas-cli registry-login --ecr --region us-east-1 --account-id 038760728819
 ```
 
 login to faas gateway:
-'''
+```
 sudo cat /var/lib/faasd/secrets/basic-auth-password
 faas-cli login -u admin -p password
-'''
+```
 
 copy the docker config auth to faas config auth:
 
