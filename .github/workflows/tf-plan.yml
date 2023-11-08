@@ -1,0 +1,61 @@
+name: Terraform Plan Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+
+env:
+  TF_SECRET_FILE: ${{ secrets.TF_SECRET_FILE }}
+  TF_VERSION: 1.6.3
+  TF_PLAN_NAME: tfplan
+
+  AWS_S3_BUCKET: das.singularitynet.io
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+
+jobs:
+  - name: Setup AWS
+    run: |-
+      pip3 install awscli
+      aws configure set aws_access_key_id ${{ env.AWS_ACCESS_KEY_ID }}
+      aws configure set aws_secret_access_key ${{ env.AWS_SECRET_ACCESS_KEY }}
+      aws configure set region ${{ env.AWS_REGION }}
+
+  validate:
+    name: Validate Terraform Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: ./.github/reusable-workflows/tf-setup.yml
+        with:
+          tf-version: ${{ env.TF_VERSION }}
+          tf-secret: ${{ env.TF_SECRET_FILE }}
+
+      - name: Check Configuration Files Format
+        run: terraform fmt -check -diff -recursive .
+
+      - name: Validate Configuration
+        run: terraform validate
+
+  plan:
+    name: Terrafrom Plan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: ./.github/reusable-workflows/tf-setup.yml
+        with:
+          tf-version: ${{ env.TF_VERSION }}
+          tf-secret: ${{ env.TF_SECRET_FILE }}
+
+      - name: Create Infrastructure Plan
+        run: terraform plan -var-file=config.tfvars -out ${{ env.TF_PLAN_NAME }}
+
+      - name: Upload Plan Artifact
+        run: s3 cp ${{ env.TF_PLAN_NAME }} s3://${{ secrets.AWS_S3_BUCKET }}/das-pre-infra-vultr/${{ env.TF_PLAN_NAME }}-latest
