@@ -1,0 +1,31 @@
+name: Terraform Apply Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+
+env:
+  TF_SECRET_FILE: ${{ secrets.TF_SECRET_FILE }}
+  TF_VERSION: 1.6.3
+  TF_PLAN_NAME: tfplan
+
+jobs:
+  apply:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download Plan Artifact
+        run: s3 cp s3://${{ secrets.AWS_S3_BUCKET }}/das-pre-infra-vultr/${{ env.TF_PLAN_NAME }}-latest ${{ env.TF_PLAN_NAME }}
+
+      - name: Setup Terraform
+        uses: ./.github/reusable-workflows/tf-setup.yml
+        with:
+          tf-version: ${{ env.TF_VERSION }}
+          tf-secret: ${{ env.TF_SECRET_FILE }}
+
+      # TODO: check if file exists fist
+      - name: Apply Changes To The Cloud
+        run: terraform apply tfplan
