@@ -15,13 +15,6 @@ env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
 
 jobs:
-  - name: Setup AWS
-    run: |-
-      pip3 install awscli
-      aws configure set aws_access_key_id ${{ env.AWS_ACCESS_KEY_ID }}
-      aws configure set aws_secret_access_key ${{ env.AWS_SECRET_ACCESS_KEY }}
-      aws configure set region ${{ env.AWS_REGION }}
-
   validate:
     name: Validate Terraform Code
     runs-on: ubuntu-latest
@@ -45,6 +38,13 @@ jobs:
     name: Terrafrom Plan
     runs-on: ubuntu-latest
     steps:
+      - name: Setup AWS
+        run: |-
+          pip3 install awscli
+          aws configure set aws_access_key_id ${{ env.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region ${{ env.AWS_REGION }}
+
       - name: Checkout
         uses: actions/checkout@v3
 
