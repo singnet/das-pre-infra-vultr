@@ -1,0 +1,28 @@
+name: Terraform Setup
+
+on:
+  workflow_call:
+    inputs:
+      tf-version:
+        description: Terraform version
+        required: true
+        type: number
+      tf-secret:
+        description: Terraform secret file content
+        required: true
+        type: string
+
+jobs:
+  terraform-setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Terrafrom
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ inputs.tf-version }}
+
+      - name: Create Secret File
+        run: echo ${{ inputs.tf-secret }} > secret.tf
+
+      - name: Terraform Init
+        run: terraform init
