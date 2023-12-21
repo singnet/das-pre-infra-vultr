@@ -18,3 +18,4 @@ jobs:
       main-branch: master
       version-tag-regex-pattern: /^v\d+\.\d+\.\d+$/
       version-require-confirmation: "true"
+    secrets: inherit
