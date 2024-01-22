@@ -48,7 +48,7 @@ module "openfaas_instance" {
 
 module "redis_instance" {
   source          = "./instance"
-  create_resource = true
+  create_resource = 3
   name            = var.is_production ? "redis" : "test-redis"
   environment     = local.environment
   user_data_file  = "install-redis.sh"
@@ -59,7 +59,7 @@ module "redis_instance" {
 
 module "mongodb_instance" {
   source          = "./instance"
-  create_resource = true
+  create_resource = 1
   name            = var.is_production ? "mongodb" : "test-mongodb"
   environment     = local.environment
   user_data_file  = "install-mongodb.sh"

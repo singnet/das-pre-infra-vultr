@@ -32,8 +32,8 @@ variable "plan" {
 }
 
 variable "create_resource" {
-  type    = bool
-  default = true
+  type    = number
+  default = 0
 }
 
 locals {
@@ -41,7 +41,7 @@ locals {
 }
 
 resource "vultr_bare_metal_server" "bare_metal" {
-  count    = var.create_resource && local.is_bare_metal ? 1 : 0
+  count    = local.is_bare_metal ? var.create_resource : 0
   label    = var.name
   hostname = var.name
   plan     = var.plan
@@ -60,7 +60,7 @@ resource "vultr_bare_metal_server" "bare_metal" {
 }
 
 resource "vultr_instance" "regular" {
-  count    = var.create_resource && !local.is_bare_metal ? 1 : 0
+  count    = !local.is_bare_metal ? var.create_resource : 0
   label    = var.name
   hostname = var.name
   plan     = var.plan
@@ -79,5 +79,5 @@ resource "vultr_instance" "regular" {
 }
 
 output "instance_ip" {
-  value = var.create_resource ? (local.is_bare_metal ? vultr_bare_metal_server.bare_metal[0].main_ip : vultr_instance.regular[0].main_ip) : ""
+  value = var.create_resource > 0 ? (local.is_bare_metal ? vultr_bare_metal_server.bare_metal[0].main_ip : vultr_instance.regular[0].main_ip) : ""
 }
