@@ -37,7 +37,7 @@ locals {
 
 module "openfaas_instance" {
   source          = "./instance"
-  create_resource = true
+  create_resource = 1
   name            = var.is_production ? "openfaas" : "test-openfaas"
   environment     = local.environment
   user_data_file  = "install-openfaas.sh"
