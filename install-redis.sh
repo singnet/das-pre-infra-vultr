@@ -1,14 +1,25 @@
 #!/bin/bash
 set -e
 
-USER_NAME="dasadmin"
-REDIS_STACK_VERSION="7.2.0-v8"
-REDIS_PORT="29100"
 REDIS_CONF_FILE="/etc/redis/redis.conf"
 
+function required_variable() {
+    if [ -z "${1}" ]; then
+        echo "The variable is not defined."
+        exit 1
+    fi
+}
+
+function check_variables() {
+    required_variable ${USER_NAME}
+    required_variable ${REDIS_STACK_VERSION}
+    required_variable ${REDIS_PORT}
+    required_variable ${OPENFAAS_INSTANCE_ID}
+}
+
 function user_setup() {
-    adduser --disabled-password --gecos "" "$USER_NAME"
-    usermod -a -G $USER_NAME $USER_NAME
+    adduser --disabled-password --gecos "" "${USER_NAME}"
+    usermod -a -G ${USER_NAME} ${USER_NAME}
 }
 
 function docker_setup() {
@@ -122,11 +133,33 @@ EOF
 function redis_setup() {
     create_redis_conf
 
-    docker image pull redis/redis-stack-server:$REDIS_STACK_VERSION
+    docker image pull redis/redis-stack-server:${REDIS_STACK_VERSION}
 
-    docker run --name redis --restart always -v $REDIS_CONF_FILE:/redis-stack.conf --port ${REDIS_PORT}:6379 -d redis/redis-stack-server:$REDIS_STACK_VERSION
+    docker run \
+        --name redis \
+        --restart always \
+        -v $REDIS_CONF_FILE:/redis-stack.conf \
+        --port ${REDIS_PORT}:6379 \
+        -d redis/redis-stack-server:${REDIS_STACK_VERSION}
 }
 
+function firewall_setup() {
+    if ! command -v ufw &>/dev/null; then
+        apt-get update
+        apt-get install ufw
+    fi
+
+    ufw -y enable
+    ufw allow from ${OPENFAAS_INSTANCE_ID} to any port ${REDIS_PORT} proto tcp
+    ufw allow ssh
+}
+
+LOG_FILE="/tmp/install-redis.log"
+
+exec >"$LOG_FILE" 2>&1
+
+check_variables
 user_setup
 docker_setup
 redis_setup
+firewall_setup

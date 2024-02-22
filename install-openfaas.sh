@@ -1,11 +1,18 @@
 #!/bin/bash
 set -e
 
-USER_NAME="dasadmin"
+function required_variable() {
+    if [ -z "${1}" ]; then
+        echo "The variable is not defined."
+        exit 1
+    fi
+}
 
 function user_setup() {
-    adduser --disabled-password --gecos "" "$USER_NAME"
-    usermod -a -G $USER_NAME $USER_NAME
+    required_variable "${USER_NAME}"
+
+    adduser --disabled-password --gecos "" "${USER_NAME}"
+    usermod -a -G "${USER_NAME}" "${USER_NAME}"
 }
 
 function openfaas_setup() {
@@ -54,6 +61,10 @@ function firewall_setup() {
     ufw allow 8080/tcp
     ufw allow ssh
 }
+
+LOG_FILE="/tmp/install-openfaas.log"
+
+exec >"$LOG_FILE" 2>&1
 
 user_setup
 docker_setup
