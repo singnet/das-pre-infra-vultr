@@ -53,7 +53,7 @@ resource "vultr_bare_metal_server" "bare_metal" {
     join(": ", ["region", var.region]),
     join(": ", ["os", "1743"]),
   ]
-  user_data        = file(var.user_data_file)
+  user_data        = var.user_data_file
   ssh_key_ids      = var.ssh_key_ids
   enable_ipv6      = true
   activation_email = true
@@ -72,7 +72,7 @@ resource "vultr_instance" "regular" {
     join(": ", ["region", var.region]),
     join(": ", ["os", "1743"]),
   ]
-  user_data        = file(var.user_data_file)
+  user_data        = var.user_data_file
   ssh_key_ids      = var.ssh_key_ids
   enable_ipv6      = false
   activation_email = false
