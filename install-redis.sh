@@ -27,7 +27,7 @@ function docker_setup() {
 
     apt-get -y update
     apt-get -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-    dockerd &
+    dockerd >/dev/null 2>&1 </dev/null &
     docker run hello-world
     docker rm $(docker ps -a | grep hello | cut -d" " -f1)
     docker rmi hello-world
