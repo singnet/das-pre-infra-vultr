@@ -19,10 +19,7 @@ setup_requirements() {
 configure_apt_repo_trigger() {
     local cron_job="*/5 * * * * /usr/local/bin/update-apt-repo.sh"
 
-    (
-        crontab -l -u root
-        echo "$cron_job"
-    ) | crontab -u root -
+    echo "$cron_job" | sudo crontab -u root -
 
     echo "Cron job configured successfully."
 }
