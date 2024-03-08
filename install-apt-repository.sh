@@ -142,9 +142,9 @@ Expire-Date: 0
     gpg --export $pgp_key_pair_name >$root_apt_repo_path/das-cli.gpg
 }
 
-produce_user_installer() {
+produce_das_cli_setup_script() {
     local public_ip_address=$(curl ifconfig.me)
-    local installer_script="$root_apt_repo_path/get.sh"
+    local installer_script="$root_apt_repo_path/setup.sh"
 
     cat <<EOF >$installer_script
 #!/bin/bash
@@ -158,7 +158,7 @@ echo "Adding public key..."
 wget --quiet --force-directories http://$public_ip_address/apt-repo/das-cli.gpg -O /etc/apt/trusted.gpg.d/das-cli.gpg
 
 echo "Updating repositories..."
-sudo apt update
+apt update
 
 echo "Setup completed successfully."
 
@@ -171,5 +171,5 @@ EOF
 setup_requirements
 setup_apt_repository
 setup_pgp_key_pair
-produce_user_installer
+produce_das_cli_setup_script
 configure_apt_repo_trigger
