@@ -11,9 +11,12 @@ setup_requirements() {
     echo "Installing requirements..."
     apt -y update
 
-    apt -y install apache2 dpkg-dev curl
+    apt -y install apache2 dpkg-dev curl ufw
 
     rm /var/www/html/index.html
+
+    ufw enable
+    ufw allow http
 }
 
 configure_apt_repo_trigger() {
