@@ -12,6 +12,19 @@ setup_requirements() {
     apt -y update
 
     apt -y install apache2 dpkg-dev curl
+
+    rm /var/www/html/index.html
+}
+
+configure_apt_repo_trigger() {
+    local cron_job="*/5 * * * * /usr/local/bin/update-apt-repo.sh"
+
+    (
+        crontab -l -u root
+        echo "$cron_job"
+    ) | crontab -u root -
+
+    echo "Cron job configured successfully."
 }
 
 produce_release_files_update_script() {
@@ -60,51 +73,63 @@ setup_apt_repository() {
 }
 
 produce_update_apt_repo_script() {
-    repo_hash_file=$(dirname $update_apt_repo_script)
+    local repo_hash_file="$(dirname "$update_apt_repo_script")/apt-repo-hash.txt"
 
-    echo "#!/bin/sh
+    cat <<EOF >"$update_apt_repo_script"
+#!/bin/sh
+
 set -e
 
-current_apt_repo_hash=\$(find $root_apt_repo_path -type f -exec sha256sum {} + | sha256sum
-)
+calculate_hash() {
+    find "\$1" -type f -exec sha256sum {} + | sha256sum | awk '{gsub(/^ +| +$/,"")} {print \$1}'
+}
 
-if [ -f $repo_hash_file/apt-repo-hash.txt ]; then
-    apt_repo_hash=\$(cat $repo_hash_file)
-    echo \"File with previous hash of the apt folder found\"
+update_repository() {
+    cd "\$1"
+
+    dpkg-scanpackages --arch amd64 pool/ > dists/stable/main/binary-amd64/Packages
+    cat dists/stable/main/binary-amd64/Packages | gzip -9 > dists/stable/main/binary-amd64/Packages.gz
+
+    cd dists/stable
+
+    "$release_script" > Release
+
+    cd -
+
+    gpg --yes -abs -u "$pgp_key_pair_name" -o "\$1/dists/stable/Release.gpg" "\$1/dists/stable/Release"
+    gpg --default-key "$pgp_key_pair_name" -abs --clearsign < "\$1/dists/stable/Release" > "\$1/dists/stable/InRelease"
+}
+
+echo "Calculating hashes..."
+current_apt_repo_hash=\$(calculate_hash "$root_apt_repo_path")
+
+if [ -f "$repo_hash_file" ]; then
+    apt_repo_hash=\$(cat "$repo_hash_file")
+    echo "Previous hash file found."
 else
-    apt_repo_hash=\$current_apt_repo_hash
-    echo \"No file with previous directory hash found\"
+    apt_repo_hash="$current_apt_repo_hash"
+    echo "No previous hash file found."
 fi
 
-echo "PREVIOUS hash: ${apt_repo_hash}"
-echo "CURRENT hash: ${current_apt_repo_hash}"
+echo "Previous hash: \${apt_repo_hash}"
+echo "Current hash: \${current_apt_repo_hash}"
 
-if [ \"\$apt_repo_hash\" != \"\$current_apt_repo_hash\" ]; then
-    dpkg-scanpackages --arch amd64 $root_apt_repo_path/pool/ > $root_apt_repo_path/dists/stable/main/binary-amd64/Packages
-    cat $root_apt_repo_path/dists/stable/main/binary-amd64/Packages | gzip -9 > $root_apt_repo_path/dists/stable/main/binary-amd64/Packages.gz
-
-    cd $root_apt_repo_path/dists/stable
-
-    $release_script > $root_apt_repo_path/dists/stable/Release
-
-    cd $root_apt_repo_path
-
-    gpg --yes -abs -u $pgp_key_pair_name -o $root_apt_repo_path/dists/stable/Release.gpg $root_apt_repo_path/dists/stable/Release
-    cat $root_apt_repo_path/dists/stable/Release | gpg --default-key $pgp_key_pair_name -abs --clearsign > $root_apt_repo_path/dists/stable/InRelease
-
-    echo \$current_apt_repo_hash > $repo_hash_file
+if [ "\$apt_repo_hash" != "\$current_apt_repo_hash" ]; then
+    echo "Updating repository..."
+    update_repository "$root_apt_repo_path"
+    calculate_hash "$root_apt_repo_path" > "$repo_hash_file"
+    echo "Repository updated successfully."
 else
-    echo \"No changes made in the repository\"
+    echo "No changes made in the repository."
 fi
+EOF
 
-" >$update_apt_repo_script
-
-    chmod +x $update_apt_repo_script
+    chmod +x "$update_apt_repo_script"
 }
 
 setup_pgp_key_pair() {
-    temp_dir=$(mktemp -d)
-    pgp_key_batch="$temp_dir/pgp-key.batch"
+    local temp_dir=$(mktemp -d)
+    local pgp_key_batch="$temp_dir/pgp-key.batch"
 
     echo "%echo Generating an DAS PGP key
 Key-Type: default
@@ -121,19 +146,26 @@ Expire-Date: 0
 }
 
 produce_user_installer() {
-    public_ip_address=$(curl ifconfig.me)
-    installer_script="$root_apt_repo_path/get.sh"
+    local public_ip_address=$(curl ifconfig.me)
+    local installer_script="$root_apt_repo_path/get.sh"
 
-    echo "#!/bin/sh
+    cat <<EOF >$installer_script
+#!/bin/bash
+
 set -e
-echo \"Setting apt repository...\"
-echo \"deb [arch=amd64] http://$public_ip_address/apt-repo stable main\" | tee /etc/apt/sources.list.d/dascli.list
-echo \"Setting public key...\"
-wget --no-verbose --force-directories http://$public_ip_address/apt-repo/das-cli.gpg -O /etc/apt/trusted.gpg.d/das-cli.gpg
-echo \"Updating repositories...\"
-apt update
-echo \"Done.\"
-" >$installer_script
+
+echo "Configuring apt repository..."
+echo "deb [arch=amd64] http://$public_ip_address/apt-repo stable main" | sudo tee /etc/apt/sources.list.d/dascli.list
+
+echo "Adding public key..."
+wget --quiet --force-directories http://$public_ip_address/apt-repo/das-cli.gpg -O /etc/apt/trusted.gpg.d/das-cli.gpg
+
+echo "Updating repositories..."
+sudo apt update
+
+echo "Setup completed successfully."
+
+EOF
 
     chmod +x $installer_script
 
@@ -143,3 +175,4 @@ setup_requirements
 setup_apt_repository
 setup_pgp_key_pair
 produce_user_installer
+configure_apt_repo_trigger
