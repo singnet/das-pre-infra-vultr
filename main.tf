@@ -29,10 +29,11 @@ variable "test_instances_plan" {
 }
 
 locals {
-  environment            = var.is_production ? "prod" : "test"
-  openfaas_instance_plan = var.is_production ? var.production_instances_plan : var.test_instances_plan
-  redis_instance_plan    = var.is_production ? var.production_instances_plan : var.test_instances_plan
-  mongodb_instance_plan  = var.is_production ? var.production_instances_plan : var.test_instances_plan
+  environment                      = var.is_production ? "prod" : "test"
+  openfaas_instance_plan           = var.is_production ? var.production_instances_plan : var.test_instances_plan
+  redis_instance_plan              = var.is_production ? var.production_instances_plan : var.test_instances_plan
+  mongodb_instance_plan            = var.is_production ? var.production_instances_plan : var.test_instances_plan
+  das_apt_repository_instance_plan = var.test_instances_plan
 
   redis_params = {
     stack_version = "7.2.0-v8"
@@ -60,7 +61,7 @@ data "template_file" "install_openfaas" {
 
 module "openfaas_instance" {
   source          = "./instance"
-  create_resource = true
+  create_resource = false
   name            = var.is_production ? "biodas1-openfaas" : "test-openfaas"
   environment     = local.environment
   user_data_file  = data.template_file.install_openfaas.rendered
@@ -83,7 +84,7 @@ data "template_file" "install_redis" {
 module "redis_instance" {
   source          = "./instance"
   create_resource = true
-  name            = var.is_production ? "biodas1-redis" : "test-redis"
+  name            = "biodas1-redis"
   environment     = local.environment
   user_data_file  = data.template_file.install_redis.rendered
   ssh_key_ids     = var.ssh_key_ids
@@ -104,13 +105,24 @@ data "template_file" "install_mongodb" {
 
 module "mongodb_instance" {
   source          = "./instance"
-  create_resource = true
-  name            = var.is_production ? "biodas1-mongodb" : "test-mongodb"
+  create_resource = false
+  name            = "biodas1-mongodb"
   environment     = local.environment
   user_data_file  = data.template_file.install_mongodb.rendered
   ssh_key_ids     = var.ssh_key_ids
   region          = var.region
   plan            = local.mongodb_instance_plan
+}
+
+module "das_apt_repository" {
+  source          = "./instance"
+  create_resource = true
+  name            = "das-apt-repository"
+  environment     = local.environment
+  user_data_file  = file("install-apt-repository.sh")
+  ssh_key_ids     = var.ssh_key_ids
+  region          = var.region
+  plan            = "vc2-1c-2gb"
 }
 
 output "openfaas_instance_ip" {
