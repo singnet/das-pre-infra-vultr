@@ -1,25 +1,12 @@
 #!/bin/bash
-set -e
 
-REDIS_CONF_FILE="/etc/redis/redis.conf"
+set -e
 
 function required_variable() {
     if [ -z "${1}" ]; then
         echo "The variable is not defined."
         exit 1
     fi
-}
-
-function check_variables() {
-    required_variable ${USER_NAME}
-    required_variable ${REDIS_STACK_VERSION}
-    required_variable ${REDIS_PORT}
-    required_variable ${OPENFAAS_INSTANCE_ID}
-}
-
-function user_setup() {
-    adduser --disabled-password --gecos "" "${USER_NAME}"
-    usermod -a -G ${USER_NAME} ${USER_NAME}
 }
 
 function docker_setup() {
@@ -44,12 +31,50 @@ function docker_setup() {
     docker rmi hello-world
 }
 
-create_redis_conf() {
+function user_setup() {
+    required_variable ${user_name}
 
-    if [ -f "$REDIS_CONF_FILE" ]; then
-        echo "O arquivo $REDIS_CONF_FILE já existe."
+    user_exists=$(getent passwd ${user_name})
+
+    if [ -z $user_exists ]; then
+        adduser --disabled-password --gecos "" "${user_name}"
+        usermod -a -G "${user_name}" "${user_name}"
     else
-        cat <<EOF >$REDIS_CONF_FILE
+        echo "Skipping: user ${user_name} already exists"
+    fi
+}
+
+function firewall_setup() {
+    if ! command -v ufw &>/dev/null; then
+        apt-get update
+        apt-get install ufw
+    fi
+
+    ufw enable
+}
+
+function mongo_setup() {
+    required_variable "${mongo_version}"
+    required_variable "${openfaas_instance_ip}"
+    required_variable "${mongo_port}"
+
+    docker image pull "mongo:${mongo_version}"
+
+    docker run --name mongo --restart always -p ${mongo_port}:27017 -d "mongo:${mongo_version}"
+
+    ufw allow from ${openfaas_instance_ip} to any port ${mongo_port} proto tcp
+    ufw allow ssh
+}
+
+function create_redis_conf() {
+    local redis_conf_file=$1
+
+    if [ -f "$redis_conf_file" ]; then
+        echo "The file $redis_conf_file already exists."
+    else
+        mkdir -p $(dirname $redis_conf_file)
+        touch $redis_conf_file
+        cat <<EOF >$redis_conf_file
 bind 0.0.0.0 ::0
 protected-mode no
 port 6379
@@ -126,40 +151,71 @@ aof-rewrite-incremental-fsync yes
 rdb-save-incremental-fsync yes
 jemalloc-bg-thread yes
 EOF
-        echo "File $REDIS_CONF_FILE created successfully."
+        echo "File $redis_conf_file created successfully."
     fi
 }
 
 function redis_setup() {
-    create_redis_conf
+    required_variable ${redis_stack_version}
+    required_variable ${redis_port}
+    required_variable ${openfaas_instance_ip}
 
-    docker image pull redis/redis-stack-server:${REDIS_STACK_VERSION}
+    local redis_conf_file="/etc/redis/redis.conf"
+
+    create_redis_conf $redis_conf_file
+
+    docker image pull redis/redis-stack-server:${redis_stack_version}
 
     docker run \
         --name redis \
         --restart always \
-        -v $REDIS_CONF_FILE:/redis-stack.conf \
-        --port ${REDIS_PORT}:6379 \
-        -d redis/redis-stack-server:${REDIS_STACK_VERSION}
-}
+        -v $redis_conf_file:/redis-stack.conf \
+        -p ${redis_port}:6379 \
+        -d redis/redis-stack-server:${redis_stack_version}
 
-function firewall_setup() {
-    if ! command -v ufw &>/dev/null; then
-        apt-get update
-        apt-get install ufw
-    fi
-
-    ufw -y enable
-    ufw allow from ${OPENFAAS_INSTANCE_ID} to any port ${REDIS_PORT} proto tcp
+    ufw allow from ${openfaas_instance_ip} to any port ${redis_port} proto tcp
     ufw allow ssh
 }
 
-LOG_FILE="/tmp/install-redis.log"
+function openfaas_setup() {
+    cat <<EOF >install-openfaas.sh
+#!/bin/bash
+set -ex
+git clone https://github.com/openfaas/faasd --depth=1
+cd faasd
+./hack/install.sh
+mkdir -p /var/lib/faasd/.docker/
+EOF
 
-exec >"$LOG_FILE" 2>&1
+    ufw allow 8080/tcp
+    ufw allow ssh
 
-check_variables
-user_setup
-docker_setup
-redis_setup
-firewall_setup
+    chmod +x install-openfaas.sh
+    ./install-openfaas.sh >>install-openfaas.log 2>&1
+}
+
+function main() {
+    required_variable ${environment_type}
+
+    local LOG_FILE="/tmp/install.log"
+
+    exec >"$LOG_FILE" 2>&1
+
+    user_setup
+    docker_setup
+    firewall_setup
+
+    if [ "$environment_type" == "redis" ]; then
+        redis_setup
+    elif [ "$environment_type" == "mongodb" ]; then
+        mongo_setup
+    elif [ "$environment_type" == "openfaas" ]; then
+        openfaas_setup
+    else
+        echo "Invalid environment type: '$environment_type'"
+        exit 1
+    fi
+
+}
+
+main

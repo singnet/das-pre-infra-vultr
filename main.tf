@@ -35,28 +35,21 @@ locals {
   mongodb_instance_plan            = var.is_production ? var.production_instances_plan : var.test_instances_plan
   das_apt_repository_instance_plan = var.test_instances_plan
 
-  redis_params = {
-    stack_version = "7.2.0-v8"
-    port          = 29100
+  instance_user_data = {
+    redis_stack_version = "7.2.0-v8"
+    redis_port          = 29100
+    mongo_version       = "7.0.5"
+    mongo_port          = 28100
+    user_name           = "dasadmin"
   }
-
-  mongo_params = {
-    version = "7.0.5"
-    port    = 28100
-  }
-
-  os_params = {
-    user_name = "dasadmin"
-  }
-
 }
 
 data "template_file" "install_openfaas" {
-  template = file("install-openfaas.sh")
+  template = file("install-server.sh")
 
-  vars = {
-    USER_NAME = local.os_params.user_name
-  }
+  vars = merge(local.instance_user_data, {
+    environment_type = "openfaas"
+  })
 }
 
 module "openfaas_instance" {
@@ -71,14 +64,12 @@ module "openfaas_instance" {
 }
 
 data "template_file" "install_redis" {
-  template = file("install-redis.sh")
+  template = file("install-server.sh")
 
-  vars = {
-    USER_NAME            = local.os_params.user_name
-    REDIS_STACK_VERSION  = local.redis_params.stack_version,
-    REDIS_PORT           = local.redis_params.port,
-    OPENFAAS_INSTANCE_ID = module.openfaas_instance.instance_ip
-  }
+  vars = merge(local.instance_user_data, {
+    environment_type     = "redis"
+    openfaas_instance_ip = module.openfaas_instance.instance_ip
+  })
 }
 
 module "redis_instance" {
@@ -93,14 +84,12 @@ module "redis_instance" {
 }
 
 data "template_file" "install_mongodb" {
-  template = file("install-mongodb.sh")
+  template = file("install-server.sh")
 
-  vars = {
-    USER_NAME            = local.os_params.user_name
-    MONGO_VERSION        = local.mongo_params.version,
-    MONGO_PORT           = local.mongo_params.port,
-    OPENFAAS_INSTANCE_ID = module.openfaas_instance.instance_ip
-  }
+  vars = merge(local.instance_user_data, {
+    environment_type     = "redis"
+    openfaas_instance_ip = module.openfaas_instance.instance_ip
+  })
 }
 
 module "mongodb_instance" {
