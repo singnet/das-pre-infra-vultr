@@ -208,7 +208,10 @@ function toolbox_setup() {
     install_toolbox
 
     cat <<EOF >/tmp/toolbox_config.txt
-
+$redis_port
+$mongo_port
+admin
+admin
 EOF
 
     das-cli config set < /tmp/toolbox_config.txt
