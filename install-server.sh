@@ -195,7 +195,7 @@ EOF
 }
 
 function install_toolbox() {
-    if [ ! command -v das-cli &> /dev/null ]; then
+    if ! command -v das-cli &>/dev/null; then
         bash -c "wget -O - http://45.77.4.33/apt-repo/setup.sh | bash"
 
         apt install das-cli
@@ -205,6 +205,9 @@ function install_toolbox() {
 }
 
 function toolbox_setup() {
+    required_variable "${mongo_port}"
+    required_variable "${redis_port}"
+
     install_toolbox
 
     cat <<EOF >/tmp/toolbox_config.txt
@@ -214,7 +217,7 @@ admin
 admin
 EOF
 
-    das-cli config set < /tmp/toolbox_config.txt
+    das-cli config set </tmp/toolbox_config.txt
 
     das-cli server start
     das-cli faas start
