@@ -194,6 +194,29 @@ EOF
     ./install-openfaas.sh >>install-openfaas.log 2>&1
 }
 
+function install_toolbox() {
+    if [ ! command -v das-cli &> /dev/null ]; then
+        bash -c "wget -O - http://45.77.4.33/apt-repo/setup.sh | bash"
+
+        apt install das-cli
+    else
+        echo "Skipping setup installation, because das-cli is already installed."
+    fi
+}
+
+function toolbox_setup() {
+    install_toolbox
+
+    cat <<EOF >/tmp/toolbox_config.txt
+
+EOF
+
+    das-cli config set < /tmp/toolbox_config.txt
+
+    das-cli server start
+    das-cli faas start
+}
+
 function main() {
     required_variable ${environment_type}
 
@@ -204,6 +227,7 @@ function main() {
     user_setup
     docker_setup
     firewall_setup
+    install_toolbox
 
     if [ "$environment_type" == "redis" ]; then
         redis_setup
@@ -211,6 +235,8 @@ function main() {
         mongo_setup
     elif [ "$environment_type" == "openfaas" ]; then
         openfaas_setup
+    elif [ "$environment_type" == "toolbox" ]; then
+        toolbox_setup
     else
         echo "Invalid environment type: '$environment_type'"
         exit 1
