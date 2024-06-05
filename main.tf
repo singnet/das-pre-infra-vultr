@@ -114,6 +114,26 @@ module "das_apt_repository" {
   plan            = "vc2-1c-2gb"
 }
 
+data "template_file" "install_toolbox" {
+  template = file("install-server.sh")
+
+  vars = merge(local.instance_user_data, {
+    environment_type = "toolbox"
+  })
+}
+
+module "test_cluster_redis_instance" {
+  source          = "./instance"
+  create_resource = false
+  count           = 3
+  name            = "server${count.index}-redis"
+  environment     = local.environment
+  user_data_file  = data.template_file.install_toolbox.rendered
+  ssh_key_ids     = var.ssh_key_ids
+  region          = var.region
+  plan            = local.mongodb_instance_plan
+}
+
 output "openfaas_instance_ip" {
   value = module.openfaas_instance.instance_ip
 }
