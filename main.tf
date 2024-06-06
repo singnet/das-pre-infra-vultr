@@ -43,13 +43,22 @@ locals {
     user_name           = "dasadmin"
   }
 }
+data "template_file" "mongodb_user_data" {
+  template = file("install-server.sh")
+
+  vars = merge(local.instance_user_data, {
+    environment_type = "toolbox"
+    redis_nodes      = join(" ", [])
+    redis_node_len   = 0
+  })
+}
 
 module "mongodb_instance" {
   source          = "./instance"
   create_resource = false
   name            = "biodas1-mongodb"
   environment     = local.environment
-  user_data_file  = data.template_file.install_mongodb.rendered
+  user_data_file  = data.template_file.mongodb_user_data.rendered
   ssh_key_ids     = var.ssh_key_ids
   region          = var.region
   plan            = local.instance_plan
