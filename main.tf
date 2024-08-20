@@ -44,7 +44,7 @@ locals {
   }
 }
 data "template_file" "mongodb_user_data" {
-  template = file("install-server.sh")
+  template = file("user-data/standalone-server.sh")
 
   vars = merge(local.instance_user_data, {
     environment_type = "toolbox"
@@ -69,7 +69,19 @@ module "das_apt_repository" {
   create_resource = true
   name            = "das-apt-repository"
   environment     = local.environment
-  user_data_file  = file("install-apt-repository.sh")
+  user_data_file  = file("user-data/deb-package-server.sh")
+  ssh_key_ids     = var.ssh_key_ids
+  region          = var.region
+  plan            = "vc2-1c-2gb"
+}
+
+module "redis_cluster" {
+  source          = "./instance"
+  create_resource = true
+  count = 3
+  name            = "rediscluster-" + count.index
+  environment     = local.environment
+  user_data_file  = file("user-data/standalone-server.sh")
   ssh_key_ids     = var.ssh_key_ids
   region          = var.region
   plan            = "vc2-1c-2gb"
