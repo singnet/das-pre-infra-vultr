@@ -44,7 +44,7 @@ locals {
   }
 }
 data "template_file" "mongodb_user_data" {
-  template = file("user-data/standalone-server.sh")
+  template = file("user-data/default-server.sh")
 
   vars = merge(local.instance_user_data, {
     environment_type = "toolbox"
@@ -53,27 +53,27 @@ data "template_file" "mongodb_user_data" {
   })
 }
 
-module "mongodb_instance" {
-  source          = "./instance"
-  create_resource = false
-  name            = "biodas1-mongodb"
-  environment     = local.environment
-  user_data_file  = data.template_file.mongodb_user_data.rendered
-  ssh_key_ids     = var.ssh_key_ids
-  region          = var.region
-  plan            = local.instance_plan
-}
+# module "mongodb_instance" {
+#   source          = "./instance"
+#   create_resource = false
+#   name            = "biodas1-mongodb"
+#   environment     = local.environment
+#   user_data_file  = data.template_file.mongodb_user_data.rendered
+#   ssh_key_ids     = var.ssh_key_ids
+#   region          = var.region
+#   plan            = local.instance_plan
+# }
 
-module "das_apt_repository" {
-  source          = "./instance"
-  create_resource = true
-  name            = "das-apt-repository"
-  environment     = local.environment
-  user_data_file  = file("user-data/deb-package-server.sh")
-  ssh_key_ids     = var.ssh_key_ids
-  region          = var.region
-  plan            = "vc2-1c-2gb"
-}
+# module "das_apt_repository" {
+#   source          = "./instance"
+#   create_resource = true
+#   name            = "das-apt-repository"
+#   environment     = local.environment
+#   user_data_file  = file("user-data/deb-package-server.sh")
+#   ssh_key_ids     = var.ssh_key_ids
+#   region          = var.region
+#   plan            = "vc2-1c-2gb"
+# }
 
 module "redis_cluster" {
   source          = "./instance"
@@ -81,8 +81,31 @@ module "redis_cluster" {
   count = 3
   name            = "rediscluster-" + count.index
   environment     = local.environment
-  user_data_file  = file("user-data/standalone-server.sh")
+  user_data_file  = file("user-data/default-server.sh")
   ssh_key_ids     = var.ssh_key_ids
   region          = var.region
   plan            = "vc2-1c-2gb"
+}
+
+module "mongodb_cluster" {
+  source          = "./instance"
+  create_resource = true
+  count = 2
+  name            = "mongodbcluster-" + count.index
+  environment     = local.environment
+  user_data_file  = file("user-data/default-server.sh")
+  ssh_key_ids     = var.ssh_key_ids
+  region          = var.region
+  plan            = "vc2-1c-2gb"
+}
+
+module "performance_test_server" {
+  source          = "./instance"
+  create_resource = true
+  name            = "performance-test" 
+  environment     = local.environment
+  user_data_file  = file("user-data/default-server.sh")
+  ssh_key_ids     = var.ssh_key_ids
+  region          = var.region
+  plan            = "vc2-1c-2gb" 
 }
