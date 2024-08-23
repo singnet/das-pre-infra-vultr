@@ -75,37 +75,34 @@ data "template_file" "mongodb_user_data" {
 #   plan            = "vc2-1c-2gb"
 # }
 
-module "redis_cluster" {
-  source          = "./instance"
-  create_resource = true
-  count = 3
-  name            = "rediscluster-" + count.index
-  environment     = local.environment
-  user_data_file  = file("user-data/default-server.sh")
-  ssh_key_ids     = var.ssh_key_ids
-  region          = var.region
-  plan            = "vc2-1c-2gb"
-}
+# module "redis_cluster" {
+#   source          = "./instance"
+#   create_resource = true
+#   count = 3
+#   name            = "rediscluster-" + count.index
+#   environment     = local.environment
+#   user_data_file  = file("user-data/default-server.sh")
+#   ssh_key_ids     = var.ssh_key_ids
+#   region          = var.region
+#   plan            = "vc2-1c-2gb"
+# }
+
+# module "redis_cluster" {
+#   source          = "./instance"
+#   create_resource = true
+#   count = 3
+#   name            = "rediscluster-" + count.index
+#   environment     = local.environment
+#   user_data_file  = file("user-data/default-server.sh")
+#   ssh_key_ids     = var.ssh_key_ids
+#   region          = var.region
+#   plan            = "vc2-1c-2gb"
+# }
+
 
 module "mongodb_cluster" {
-  source          = "./instance"
-  create_resource = true
-  count = 2
-  name            = "mongodbcluster-" + count.index
-  environment     = local.environment
-  user_data_file  = file("user-data/default-server.sh")
+  source          = "./mongodb"
   ssh_key_ids     = var.ssh_key_ids
   region          = var.region
-  plan            = "vc2-1c-2gb"
-}
-
-module "performance_test_server" {
-  source          = "./instance"
-  create_resource = true
-  name            = "performance-test" 
   environment     = local.environment
-  user_data_file  = file("user-data/default-server.sh")
-  ssh_key_ids     = var.ssh_key_ids
-  region          = var.region
-  plan            = "vc2-1c-2gb" 
 }
