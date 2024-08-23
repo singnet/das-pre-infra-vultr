@@ -36,12 +36,13 @@ resource "null_resource" "mongo_init_replica_set" {
 
   provisioner "remote-exec" {
     inline = [
-      <<EOF
+      <<-EOF
         members = []
         for i in range(${length(module.mongodb_cluster_config_set)}) {
-          members.append("{_id: ${i}, host: '${module.mongodb_cluster_config_set[i].public_ip}:28041'}")
+          members.append("{_id: ${i}, host: \\"${module.mongodb_cluster_config_set[i].public_ip}:2804${i+1}\\"}")
         }
-        rsconf = "{_id: 'config_repl', members: [${','.join(members)}]}"
+        rsconf = "{_id: \\"config_repl\\", members: [${join(",", members)}]}"
+        echo "Configuração do replica set: ${rsconf}"
         mongosh --host ${module.mongodb_cluster_config_set[0].public_ip} --port 28041 --eval "rs.initiate(${rsconf})"
       EOF
     ]
