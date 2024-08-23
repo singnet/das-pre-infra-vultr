@@ -21,7 +21,7 @@ module "mongodb_cluster_config_set" {
   source          = "../instance"
   create_resource = true
   count           = 2
-  name            = "configrepl" + count.index + "-${random_string.random[count.index].id}"
+  name            = "configrepl${count.index}-${random_string.random[count.index].id}"
   environment     = var.environment
   user_data_file  = file("user-data/mongodb-cluster/config-set.sh")
   ssh_key_ids     = var.ssh_key_ids
