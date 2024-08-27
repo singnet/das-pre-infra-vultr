@@ -34,24 +34,21 @@ resource "null_resource" "mongo_init_replica_set" {
     module.mongodb_cluster_config_set
   ]
 
+  triggers = {
+    cluster_instance_ids = join(",", module.mongodb_cluster_config_set[*].instance_ip)
+  }
+
   provisioner "remote-exec" {
     inline = [
-      <<-EOF
-        members = []
-        for i in range(${length(module.mongodb_cluster_config_set)}) {
-          members.append("{_id: ${i}, host: \\"${module.mongodb_cluster_config_set[i].public_ip}:2804${i+1}\\"}")
-        }
-        rsconf = "{_id: \\"config_repl\\", members: [${join(",", members)}]}"
-        echo "Configuração do replica set: ${rsconf}"
-        mongosh --host ${module.mongodb_cluster_config_set[0].public_ip} --port 28041 --eval "rs.initiate(${rsconf})"
-      EOF
+      "/tmp/bootstrap-cluster.sh ${join(" ",
+      module.mongodb_cluster_config_set[*].instance_ip)}",
     ]
-
+    
     connection {
       type        = "ssh"
       user        = "ubuntu"
       private_key = file("~/.ssh/openfaas.pem")
-      host        = module.mongodb_cluster_config_set[0].public_ip
+      host        = module.mongodb_cluster_config_set[0].instance_ip
     }
   }
 }

@@ -15,6 +15,10 @@ function install_docker() {
     raise_command_not_found "docker"
 }
 
+function generate_init_cluster_script() {
+    
+}
+
 function setup() {
     raise_command_not_found "curl"
 
