@@ -11,6 +11,17 @@ function raise_command_not_found() {
 fi 
 }
 
+function enable_firewall() {
+    if ! command -v ufw &>/dev/null; then
+        apt-get update
+        apt-get install ufw
+    fi
+
+    ufw enable
+    ufw allow ssh
+    ufw allow 28041
+}
+
 function install_mongodb() {
   if command -v mongod; then
     echo "Skipping mongodb installation because it's already installed."
@@ -59,3 +70,5 @@ EOF
 }
 
 install_mongodb
+enable_firewall
+setup

@@ -63,7 +63,7 @@ resource "null_resource" "mongo_init_replica_set" {
   }
 
   provisioner "file" {
-    source      = "./user-data/init-replica-set.sh"
+    source      = "mongodb-shards/user-data/init-replica-set.sh"
     destination = "/tmp/bootstrap-cluster.sh"
 
 
@@ -77,6 +77,7 @@ resource "null_resource" "mongo_init_replica_set" {
 
   provisioner "remote-exec" {
     inline = [
+      "chmod +x /tmp/bootstrap-cluster.sh",
       "/tmp/bootstrap-cluster.sh ${join(" ",
       slice(module.mongodb_cluster_config_set[*].instance_ip, count.index * var.nodes_per_config_set, (count.index + 1) * var.nodes_per_config_set))}"
     ]

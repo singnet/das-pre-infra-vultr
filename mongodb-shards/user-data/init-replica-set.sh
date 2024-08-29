@@ -8,7 +8,7 @@ function get_replica_config() {
     local config='{"_id": "config_repl", "members": []}'
 
     for ((i=0; i<${#public_ips[@]}; i++)) {
-        local member="{\"_id\": $i, \"host\": \"${public_ips[i]}\"}"
+        local member="{\"_id\": $i, \"host\": \"${public_ips[i]}:28041\"}"
         members=$(jq --argjson newMember "$member" '. + [$newMember]' <<<"$members")
     }
 
@@ -22,9 +22,9 @@ function get_replica_config_script() {
     local replica_set_config
     rsconf=$(get_replica_config "$@")
     replica_set_config=$(cat <<EOF
-rsconf = ${rsconf}
-rs.initiate(rsconf)
-rs.status()
+rsconf = ${rsconf};
+rs.initiate(rsconf);
+rs.status();
 EOF
 )
 
