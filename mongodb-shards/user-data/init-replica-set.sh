@@ -1,16 +1,12 @@
 #!/bin/bash
 
-#get all paramerters
-#shift nos argumentos
-#
-
 function get_replica_config() {
     local public_ips=("$@")
     local members="[]"
     local config='{"_id": "config_repl", "members": []}'
 
     for ((i=0; i<${#public_ips[@]}; i++)) {
-        local member="{\"_id\": \"$i\", \"host\": \"${public_ips[i]}\"}"
+        local member="{\"_id\": $i, \"host\": \"${public_ips[i]}\"}"
         members=$(jq --argjson newMember "$member" '. + [$newMember]' <<<"$members")
     }
 
@@ -20,8 +16,10 @@ function get_replica_config() {
 }
 
 function get_replica_config_script() {
-    local rsconf=$(get_replica_config "127.0.0.0" "125.0.0.0")
-    local replica_set_config=$(cat <<EOF
+    local rsconf
+    local replica_set_config
+    rsconf=$(get_replica_config "$@")
+    replica_set_config=$(cat <<EOF
 rsconf = ${rsconf}
 rs.initiate(rsconf)
 rs.status()
@@ -32,9 +30,11 @@ EOF
 }
 
 function setup() {
-    local rsconf=$(get_replica_config_script)
+    local rsconf
 
-    docker exec -it configrepl1 mongosh "$rsconf"
+    rsconf=$(get_replica_config_script "$@")
+
+    mongosh --port 28041 --eval "$rsconf" 
 }
 
-setup
+setup "$@"

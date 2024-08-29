@@ -100,9 +100,17 @@ data "template_file" "mongodb_user_data" {
 # }
 
 
-module "mongodb_cluster" {
-  source          = "./mongodb"
-  ssh_key_ids     = var.ssh_key_ids
-  region          = var.region
-  environment     = local.environment
+module "mongodb_shard" {
+  source      = "./mongodb-shards"
+  ssh_key_ids = var.ssh_key_ids
+  region      = var.region
+  environment = local.environment
+
+  shards          = 2
+  nodes_per_shard = 2
+
+  config_set_count     = 1
+  nodes_per_config_set = 2
+
+  mongos = 1
 }
