@@ -36,8 +36,7 @@ variable "mongos" {
 
 resource "random_string" "random" {
   length           = 16
-  special          = true
-  override_special = "/@£$"
+  special          = false
   count            = var.nodes_per_config_set * var.config_set_count
 }
 
@@ -70,7 +69,7 @@ resource "null_resource" "mongo_init_replica_set" {
 
     connection {
       type        = "ssh"
-      user        = "ubuntu"
+      user        = "root"
       private_key = file("~/.ssh/server.pem")
       host        = slice(module.mongodb_cluster_config_set[*].instance_ip, count.index * var.nodes_per_config_set, (count.index + 1) * var.nodes_per_config_set)[0]
     }
@@ -84,7 +83,7 @@ resource "null_resource" "mongo_init_replica_set" {
 
     connection {
       type        = "ssh"
-      user        = "ubuntu"
+      user        = "root"
       private_key = file("~/.ssh/server.pem")
       host        = slice(module.mongodb_cluster_config_set[*].instance_ip, count.index * var.nodes_per_config_set, (count.index + 1) * var.nodes_per_config_set)[0]
     }
