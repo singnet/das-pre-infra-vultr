@@ -1,5 +1,7 @@
 #!/bin/bash
 
+exec >/tmp/init-replica-set.log 2>&1
+
 function get_replica_config() {
     local public_ips=("$@")
     local members="[]"

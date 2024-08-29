@@ -1,5 +1,7 @@
 #!/bin/bash
 
+exec >/tmp/jconfig-set.log 2>&1
+
 function raise_command_not_found() {
   local cmd="$1"
 
