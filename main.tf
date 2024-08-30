@@ -106,7 +106,7 @@ module "mongodb_shard" {
   region      = var.region
   environment = local.environment
 
-  shards          = 2
+  shards          = 1
   nodes_per_shard = 2
 
   config_set_count     = 1
