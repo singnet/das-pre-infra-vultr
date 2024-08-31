@@ -52,7 +52,7 @@ module "mongodb_cluster_config_set" {
   plan            = "vc2-1c-2gb"
 }
 
-resource "null_resource" "mongo_init_replica_set" {
+resource "null_resource" "mongo_init_config_set" {
   depends_on = [
     module.mongodb_cluster_config_set
   ]
@@ -63,7 +63,7 @@ resource "null_resource" "mongo_init_replica_set" {
   }
 
   provisioner "file" {
-    source      = "mongodb-shards/user-data/init-replica-set.sh"
+    source      = "mongodb-shards/user-data/init-config-set.sh"
     destination = "/tmp/bootstrap-cluster.sh"
 
 
@@ -115,7 +115,7 @@ resource "null_resource" "mongo_init_shard" {
   }
 
   provisioner "file" {
-    source      = "mongodb-shards/user-data/init-replica-set.sh"
+    source      = "mongodb-shards/user-data/init-shard-set.sh"
     destination = "/tmp/bootstrap-cluster.sh"
 
 
