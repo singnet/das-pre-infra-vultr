@@ -1,7 +1,35 @@
 #!/bin/bash
 
-exec >/tmp/init-config-set.log 2>&1
+# GLOBAL VARIABLES
+PID_FILE="/run/terraform-shard-manager.pid"
+CURRENT_SCRIPT_LOGS="/tmp/bootstrap-cluster.log"
 
+exec >$CURRENT_SCRIPT_LOGS 2>&1
+
+function cleanup() {
+	if [ -f "$PID_FILE" ]; then
+		rm -f "$PID_FILE"
+	fi
+}
+
+function create_pid_file()  {
+	local max_attempts=5
+
+	for ((i=$max_attempts; i>0;i--)); do
+		if [ -f "$PID_FILE" ]; then
+			echo "Script is already running with PID $(cat "$PID_FILE"). Waiting process to end..."
+			sleep 1m
+			continue
+		fi
+
+		echo $$ > "$PID_FILE"
+		trap cleanup EXIT
+		return 0
+	done
+
+	echo "Exiting due to waiting too long for the process to finish."
+	exit 1
+}
 
 function get_replica_config() {
     local public_ips=("$@")
@@ -36,8 +64,10 @@ function setup() {
     local rsconf
 
     rsconf=$(get_replica_config_script "$@")
+    sleep 2m # TODO: ensure the other instances is ready to join the cluster
 
     mongosh --port 28041 --eval "$rsconf" 
 }
 
+create_pid_file
 setup "$@"
