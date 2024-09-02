@@ -1,6 +1,14 @@
 #!/bin/bash
 
-exec >/tmp/config-shard.log 2>&1
+# GLOBAL VARIABLES
+PID_FILE="/run/terraform-shard-manager.pid"
+MONGODB_DB_CLUSTER="/opt/shard/shardsvr-node"
+MONGODB_CLUSTER_CONFIG="/opt/shard/mongod.conf"
+MONGODB_LOGS="/tmp/mongod.log"
+CURRENT_SCRIPT_LOGS="/tmp/config-shard.log"
+
+exec >$CURRENT_SCRIPT_LOGS 2>&1
+
 
 function raise_command_not_found() {
   local cmd="$1"
@@ -9,6 +17,34 @@ function raise_command_not_found() {
     echo "$cmd is required"
     exit 1
 fi 
+}
+
+
+function cleanup() {
+	if [ -f "$PID_FILE" ]; then
+		rm -f "$PID_FILE"
+	fi
+}
+
+function create_pid_file()  {
+	if [ -f "$PID_FILE" ]; then
+		echo "Script is already running with PID $(cat "$PID_FILE"). Waiting process to end..."
+		exit 1
+	fi
+
+	echo $$ > "$PID_FILE"
+	trap cleanup EXIT
+}
+
+function enable_firewall() {
+    if ! command -v ufw &>/dev/null; then
+        apt-get update
+        apt-get install ufw
+    fi
+
+    ufw enable
+    ufw allow ssh
+    ufw allow 28041
 }
 
 function install_mongodb() {
@@ -30,22 +66,20 @@ function install_mongodb() {
 
 function setup() {
   local public_ip
-  local mongodb_db_folder="/opt/shard/shardsvr-node"
-  local mongodb_config="/opt/shard/mongod.conf"
 
   raise_command_not_found "curl"
 
   public_ip="$(curl ipinfo.io/ip)"
 
-  mkdir -p $mongodb_db_folder
+  mkdir -p $MONGODB_DB_CLUSTER
 
-  cat <<EOF > $mongodb_config
+  cat <<EOF > $MONGODB_CLUSTER_CONFIG
 systemLog:
   destination: file
-  path: "/tmp/mongod.log"
+  path: "$MONGODB_LOGS"
   logAppend: true
 storage:
-  dbPath: "$mongodb_db_folder"
+  dbPath: "$MONGODB_DB_CLUSTER"
 net:
   port: 28041
   bindIp: "$public_ip,localhost"
@@ -55,7 +89,10 @@ sharding:
   clusterRole: "shardsvr"
 EOF
 
-  mongod --config $mongodb_config &
+  mongod --config $MONGODB_CLUSTER_CONFIG &
 }
 
+create_pid_file
 install_mongodb
+enable_firewall
+setup

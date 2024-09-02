@@ -60,8 +60,21 @@ EOF
     echo -e "$replica_set_config"
 }
 
+function cluster_initialized() {
+    if [[ "$(mongosh --port 28041 --eval 'rs.status().ok')" == "1" ]]; then
+        return 0
+    fi
+
+    return 1
+}
+
 function setup() {
     local rsconf
+
+    if cluster_initialized; then
+        echo "The cluster has already been initialized. Skipping initialization..."
+        exit 0
+    fi
 
     rsconf=$(get_replica_config_script "$@")
     sleep 2m # TODO: ensure the other instances is ready to join the cluster
