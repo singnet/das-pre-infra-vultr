@@ -53,69 +53,48 @@ data "template_file" "mongodb_user_data" {
   })
 }
 
-# module "mongodb_instance" {
-#   source          = "./instance"
-#   create_resource = false
-#   name            = "biodas1-mongodb"
-#   environment     = local.environment
-#   user_data_file  = data.template_file.mongodb_user_data.rendered
-#   ssh_key_ids     = var.ssh_key_ids
-#   region          = var.region
-#   plan            = local.instance_plan
-# }
+module "mongodb_instance" {
+  source          = "./instance"
+  create_resource = false
+  name            = "biodas1-mongodb"
+  environment     = local.environment
+  user_data_file  = data.template_file.mongodb_user_data.rendered
+  ssh_key_ids     = var.ssh_key_ids
+  region          = var.region
+  plan            = local.instance_plan
+}
 
-# module "das_apt_repository" {
-#   source          = "./instance"
-#   create_resource = true
-#   name            = "das-apt-repository"
-#   environment     = local.environment
-#   user_data_file  = file("user-data/deb-package-server.sh")
-#   ssh_key_ids     = var.ssh_key_ids
-#   region          = var.region
-#   plan            = "vc2-1c-2gb"
-# }
-
-# module "redis_cluster" {
-#   source          = "./instance"
-#   create_resource = true
-#   count = 3
-#   name            = "rediscluster-" + count.index
-#   environment     = local.environment
-#   user_data_file  = file("user-data/default-server.sh")
-#   ssh_key_ids     = var.ssh_key_ids
-#   region          = var.region
-#   plan            = "vc2-1c-2gb"
-# }
-
-# module "redis_cluster" {
-#   source          = "./instance"
-#   create_resource = true
-#   count = 3
-#   name            = "rediscluster-" + count.index
-#   environment     = local.environment
-#   user_data_file  = file("user-data/default-server.sh")
-#   ssh_key_ids     = var.ssh_key_ids
-#   region          = var.region
-#   plan            = "vc2-1c-2gb"
-# }
-
+module "das_apt_repository" {
+  source          = "./instance"
+  create_resource = true
+  name            = "das-apt-repository"
+  environment     = local.environment
+  user_data_file  = file("user-data/deb-package-server.sh")
+  ssh_key_ids     = var.ssh_key_ids
+  region          = var.region
+  plan            = "vc2-1c-2gb"
+}
 
 module "mongodb_shard" {
   source      = "./mongodb-shards"
   region      = var.region
   environment = local.environment
 
-  shards = {
-    clusters = 1
+  shard = {
+    clusters          = 1
     nodes_per_cluster = 2,
-    instaceType = "vc2-1c-2gb"
+    instance_type     = "vc2-1c-2gb"
   }
 
-  shards          = 1
-  nodes_per_shard = 2
+  config_set = {
+    clusters          = 1
+    nodes_per_cluster = 2,
+    instance_type     = "vc2-1c-2gb"
+  }
 
-  config_set_count     = 1
-  nodes_per_config_set = 2
+  mongos = {
+    nodes         = 1
+    instance_type = "vc2-1c-2gb"
+  }
 
-  mongos = 1
 }
