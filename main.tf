@@ -44,7 +44,7 @@ locals {
   }
 }
 data "template_file" "mongodb_user_data" {
-  template = file("install-server.sh")
+  template = file("user-data/default-server.sh")
 
   vars = merge(local.instance_user_data, {
     environment_type = "toolbox"
@@ -69,8 +69,32 @@ module "das_apt_repository" {
   create_resource = true
   name            = "das-apt-repository"
   environment     = local.environment
-  user_data_file  = file("install-apt-repository.sh")
+  user_data_file  = file("user-data/deb-package-server.sh")
   ssh_key_ids     = var.ssh_key_ids
   region          = var.region
   plan            = "vc2-1c-2gb"
+}
+
+module "mongodb_shard" {
+  source      = "./mongodb-shards"
+  region      = var.region
+  environment = local.environment
+
+  shard = {
+    clusters          = 1
+    nodes_per_cluster = 2,
+    instance_type     = "vc2-1c-2gb"
+  }
+
+  config_set = {
+    clusters          = 1
+    nodes_per_cluster = 2,
+    instance_type     = "vc2-1c-2gb"
+  }
+
+  mongos = {
+    nodes         = 1
+    instance_type = "vc2-1c-2gb"
+  }
+
 }
