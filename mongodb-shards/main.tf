@@ -6,32 +6,43 @@ variable "environment" {
   type = string
 }
 
-variable "shards" {
-  type = number
-}
-
-variable "nodes_per_shard" {
-  type = number
-}
-
-
-variable "config_set_count" {
-  type = number
+variable "shard" {
+  type = object({
+    clusters          = number
+    nodes_per_cluster = number
+    instance_type     = string
+  })
 }
 
 
-variable "nodes_per_config_set" {
-  type = number
+variable "config_set" {
+  type = object({
+    clusters          = number
+    nodes_per_cluster = number
+    instance_type     = string
+  })
 }
 
 variable "mongos" {
-  type = number
+  type = object({
+    nodes         = number
+    instance_type = string
+  })
+}
+
+terraform {
+  required_providers {
+    vultr = {
+      source  = "vultr/vultr"
+      version = "2.15.1"
+    }
+  }
 }
 
 resource "random_string" "random" {
   length  = 16
   special = false
-  count   = var.nodes_per_config_set * var.config_set_count
+  count   = var.config_set.clusters * var.config_set.nodes_per_cluster
 }
 
 resource "tls_private_key" "mongodb_ssh_key" {
@@ -40,12 +51,12 @@ resource "tls_private_key" "mongodb_ssh_key" {
 }
 
 resource "vultr_ssh_key" "mongodb_ssh_key" {
-  name = "mongodb-shard-${formatdate("YYYYMMDDhhmmss", timestamp())}"
-  ssh_key = tls_private_key.ssh_key.public_key_pem
+  name    = "mongodb-shard-${formatdate("YYYYMMDDhhmmss", timestamp())}"
+  ssh_key = tls_private_key.mongodb_ssh_key.public_key_openssh
 }
 
 resource "local_file" "mongodb_private_key" {
-  content = tls_private_key.mongodb_ssh_key.private_key_pem
+  content  = tls_private_key.mongodb_ssh_key.private_key_pem
   filename = "${vultr_ssh_key.mongodb_ssh_key.name}.pem"
 }
 
