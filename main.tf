@@ -102,9 +102,14 @@ data "template_file" "mongodb_user_data" {
 
 module "mongodb_shard" {
   source      = "./mongodb-shards"
-  ssh_key_ids = var.ssh_key_ids
   region      = var.region
   environment = local.environment
+
+  shards = {
+    clusters = 1
+    nodes_per_cluster = 2,
+    instaceType = "vc2-1c-2gb"
+  }
 
   shards          = 1
   nodes_per_shard = 2
