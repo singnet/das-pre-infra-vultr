@@ -74,3 +74,14 @@ module "das_apt_repository" {
   region          = var.region
   plan            = "vc2-1c-2gb"
 }
+
+module "das_github_runner" {
+  source          = "./instance"
+  create_resource = true
+  name            = "das-github-runner"
+  environment     = local.environment
+  user_data_file  = file("github-runner.sh")
+  ssh_key_ids     = var.ssh_key_ids
+  region          = var.region
+  plan            = "vc2-1c-2gb"
+}
