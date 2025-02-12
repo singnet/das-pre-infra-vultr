@@ -81,7 +81,30 @@ module "das_github_runner" {
   name            = "das-github-runner"
   environment     = local.environment
   user_data_file  = file("github-runner.sh")
+  ssh_key_ids     = []
+  region          = var.region
+  plan            = "vc2-6c-16gb"
+}
+
+
+data "template_file" "nunet_integration_test_data" {
+  template = file("install-server.sh")
+
+  vars = merge(local.instance_user_data, {
+    environment_type = "toolbox"
+    redis_nodes      = join(" ", [])
+    redis_node_len   = 0
+  })
+}
+
+
+module "nunet_integration_test" {
+  source          = "./instance"
+  create_resource = true
+  name            = "nunet-integration-test"
+  environment     = local.environment
+  user_data_file  = data.template_file.nunet_integration_test_data.rendered
   ssh_key_ids     = var.ssh_key_ids
   region          = var.region
-  plan            = "vc2-1c-2gb"
+  plan            = "voc-g-2c-8gb-50s"
 }
