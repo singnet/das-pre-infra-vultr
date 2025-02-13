@@ -76,6 +76,19 @@ resource "vultr_instance" "regular" {
   ssh_key_ids      = var.ssh_key_ids
   enable_ipv6      = false
   activation_email = false
+
+  backups = "enabled"
+
+  backups_schedule {
+    hour = 6
+    dom = 0
+    dow = 0
+    type = "weekly"
+  }
+
+  lifecycle {
+    ignore_changes = [user_data, ssh_key_ids]
+  }
 }
 
 output "instance_ip" {
