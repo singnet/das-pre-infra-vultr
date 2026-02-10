@@ -74,6 +74,9 @@ function users_setup() {
         chmod 700 "$user_home/.ssh"
         chmod 600 "$user_home/.ssh/authorized_keys"
 
+        usermod -aG sudo $username
+        usermod -aG docker $username
+
     done
 
 }
