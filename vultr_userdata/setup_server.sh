@@ -54,7 +54,7 @@ function users_setup() {
 
     apt install jq -y
 
-    USERS_FILE="./users_public_keys.json"
+    USERS_FILE="/tmp/setup-server/vultr_userdata/users_public_keys.json"
 
     jq -c '.[]' "$USERS_FILE" | while read -r user; do
         username=$(echo "$user" | jq -r '.username')
