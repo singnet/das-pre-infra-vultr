@@ -62,20 +62,21 @@ function users_setup() {
 
         if ! id "$username" &>/dev/null; then
             adduser --disabled-password --gecos "" "$username"
+
+            user_home=$(eval echo "~$username")
+            mkdir -p "$user_home/.ssh"
+            echo "$pubkey" > "$user_home/.ssh/authorized_keys"
+
+            chown -R "$username:$username" "$user_home/.ssh"
+            chmod 700 "$user_home/.ssh"
+            chmod 600 "$user_home/.ssh/authorized_keys"
+
+            usermod -aG sudo $username
+            usermod -aG docker $username
+
         else
             echo "User $username already exists."
         fi
-
-        user_home=$(eval echo "~$username")
-        mkdir -p "$user_home/.ssh"
-        echo "$pubkey" > "$user_home/.ssh/authorized_keys"
-
-        chown -R "$username:$username" "$user_home/.ssh"
-        chmod 700 "$user_home/.ssh"
-        chmod 600 "$user_home/.ssh/authorized_keys"
-
-        usermod -aG sudo $username
-        usermod -aG docker $username
 
     done
 
