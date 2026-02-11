@@ -128,18 +128,38 @@ function install_toolbox() {
     fi
 }
 
+function log_step() {
+    local MSG="$1"
+    echo -e "\n============================"
+    echo "$MSG"
+    echo "============================\n"
+}
+
 function main() {
 
     local LOG_FILE="/tmp/install.log"
 
     exec >"$LOG_FILE" 2>&1
 
+    log_step "STEP 1 - TEAM USERS SETUP"
     users_setup
+
+    log_step "STEP 2 - TIMEZONE SETUP"
     timezone_setup
+
+    log_step "STEP 3 - UFW SETUP"
     firewall_setup
+
+    log_step "STEP 4 - SSH SETUP"
     ssh_setup
+
+    log_step "STEP 5 - DOCKER SETUP"
     docker_setup
+
+    log_step "STEP 6 - NET-TOOLS SETUP"
     net-tools_setup
+
+    log_step "STEP 7 - DAS TOOLBOX SETUP"
     install_toolbox
 }
 
