@@ -55,6 +55,7 @@ function users_setup() {
     apt install jq -y
 
     USERS_FILE="/tmp/setup-server/vultr_userdata/users_public_keys.json"
+    PWD="/tmp/pwd"
 
     jq -c '.[]' "$USERS_FILE" | while read -r user; do
         username=$(echo "$user" | jq -r '.username')
@@ -70,6 +71,8 @@ function users_setup() {
             chown -R "$username:$username" "$user_home/.ssh"
             chmod 700 "$user_home/.ssh"
             chmod 600 "$user_home/.ssh/authorized_keys"
+
+            echo "$username:$(cat $PWD)" | sudo chpasswd
 
             usermod -aG sudo $username
             usermod -aG docker $username
