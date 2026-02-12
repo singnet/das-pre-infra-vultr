@@ -88,7 +88,7 @@ function users_setup() {
 function set_ssh_server_rules() {
     sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
     sed -i 's/^#\?PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
-    sed -i 's/^#\?ChallengeResponseAuthentication.*/ChallengeResponseAuthentication no/' /etc/ssh/sshd_config
+    sed -i 's/^#\?KbdInteractiveAuthentication.*/KbdInteractiveAuthentication no/' /etc/ssh/sshd_config
     sed -i 's/^#\?UsePAM.*/UsePAM no/' /etc/ssh/sshd_config
 }
 
@@ -98,12 +98,16 @@ function ssh_setup() {
 
     if [ -f /etc/ssh/sshd_config ]; then
         set_ssh_server_rules
+
+        systemctl restart ssh
+        systemctl restart sshd
     else
         apt install openssh-server -y
 
         set_ssh_server_rules
 
         systemctl restart ssh
+        systemctl restart sshd
     fi
 
 }
