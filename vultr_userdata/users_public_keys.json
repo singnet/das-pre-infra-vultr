@@ -1,0 +1,26 @@
+[
+    {
+        "username": "levi",
+        "userPubKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC9r9DRbjHQLzUkkiDnhZamo1SZSKFUbFXilj4Mvh+7pSyslOO0We9UW7V0thta2w4wciWRFkclWAT2mRC0AVZEhPxLSCX8zhHww433W6qkBxyLF4ETDJB+cX0xCq76qZ5X5T0lqCBez9zD2gcu0pdEswPs0xoHRWbkDNJQ3D1eYGLY1xZIO/jPy4IH3RJKzwFjaYgmdvxxA02JJW8FVqlnXfjHh2Wf5WWA8yzy8K9U+HgsKbFr+wCdviBIgxj/mUW89Hzwjia8117tARnD1kjmiVP9ipoOodJHTM6afcayr8z5SNgltk43SB6dIwW1lz+UBS0IsEjr8dfmbYpqd8pBYT3/80iKZ5/jElCyjfGpRSwk967gjJ0UBAFLQrnjOfvDlAV6KSYicgViER0flBE+lw5jfta22gNrFBrqPhH30Kun8fHOSCTXPX3iuCL6AN4ehbvrZXgfWATBp0SLc/ERtkLRvzxESO9W4UetvEqL+6cpORfYDcFrCsMMI0Vm9e0= levicosta@rafaels-mbp-2.lan"
+    },
+
+    {
+        "username": "marco",
+        "userPubKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDLfX4DwTcsQsh5as6J4mhdFL3moDtnkq5C7ljdqfzEYgJesF8nR7v2XFFxTiIu4iBuh/MTNnGGlANWKBIoVxhKuzNzHgXREwQcDWaKME00sXJAVrQ1zmbGyaKn0ZSOloaoQVBhPCvBMY6PjLZELVHJtErtBh/Qxp7ir01bxcoMPdy4p2+fvTqCffJf33wIlbnwwLyOSMmo8O5vZ4GQpruJtld4RS2wp8wVPQo9FkY6sR9zgtRGn3ogYybMVe07osr6VJ0MI1gk9jglc6YqV97B7ySoeE8hndof4B8UL1ZHr3MlcD6L8d11C6jaQqMH2xJ/0oxNvlD89XRTCaH+YwKHFeRQaHz2hI/ndSuIceCMRoLOR4kPGyozT32Z3NQXILtyVgBff0mU+th+ezcXxpUfsGfw7oZj0PGthc0LFt8TsnZtyPTIAu+dDaypiUh71ksXR1CkBjtJsjEdWUgtANomjNYpf353XMm1CN2eZEOL0KZuAMColQu/pqORniwOgg8/ifaaSR5wxbLgNJ+Drf7c1L0B1Ls38dKufNtdS6ifl8t2oSoXU9m6O4ju+NRuSee35hzyceIUp/nnGg9xXOt9RKzmAgxEFR9S7Ik9PvJTlCi7r8e3nJDglVqRuDn0JvMK1+yoOFjnBJWo+q2SzfYEKley6XVIyHTIcnsntNJzmw== masc@masc-alienware"
+    },
+
+    {
+        "username": "edgar",
+        "userPubKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQClnng8TPJLtSXBB/n8JFRbGGZOXr8mMtgOyrbbLCqZeK7YzNobbEKuXU6GcxYifpjHhKjJApTWABW6YshsQgupv8sTc38EEsnUxiu3RdzU042+w8AW06PhGjgfFyWp7ZBUsuy1KNgn4HSrXI8SuKWm1TCTxvGrYX5vEmgwyAhAZEcs8SkuY4mWBuYeSbaa4JEfr7WWtYhiS7ZrpAeBvD+cdQ0C7nu/TgkleI47QlMBHvlBsvoS/jWr6C8t2k4tKsi7MM2hEeGQK2oL+lI7sOFLXU7X0O505yJHTDWFqWUAjRQPmG3LaP6RdNy2KhFkEGRwsNpHAJplpwAl2CWfsioR+Hf/pRbU3A18i16hfxZfSXlSCSUUdk02Vi1YX+f9k4aFJ6FtnnWSM5QEAaxTfazW9AA15qw1JY9ZSgCFOI+MZ7Uc+CaYeNwdT8xBYNPvrwheKXg6/JJDrzVXcT6/jyUdP7r/4kriBmZG6JSjl2gy4jOAndgqSvQ0olqkFa0WayE= edgar@zus"
+    },
+
+    {
+        "username": "artur",
+        "userPubKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDHvJXRhzwR6PDLflsokXbKcNoBoGns4m43sjabiQrEb+h+tr/gFhc0ZfQpGU4tYLI8sP91FGyi+3h7yV0wQ7vH/VN4Md8jQdNtr1BRScZWVYOcsgBTkCDfNuFnUeGTAZnDeXm4kTTpE4SqHH62NMf20auMVB2e2LTZLERTw5mAogSMst0n762LW19snQP6j+BGmQL+FrqBatZThaKYeGQo34gTpN56DNJb4hsLGKhwZ2yIYgXLhsRh40BeCu0Z0jnJvuouM25trc2aWYFZEm3CA6PGKVOlsOl1qMK7/z+XN1fEpr0AhdwxbN7Cencf6ulfPOnmP34hRlRMjKS8YeE6NU81aNy4diaSb/rQffqKaXRJgBHrVcOxTqaiQrm3PcDp+JcLbEOJl9FcmDtmZTtQoa8EuXBmXQl3jcjfdqi1Kd+LlgkbopRTbaIUuKDrXMm78sFpNZ9VRnSHjhH0jRe2UThpPSWjRuePhXE1MlXhVrH5oQhbPRiiKVQB+NsVAwikLj91X5mkrBo9345Adb4aWdXN1YE44FXKmpd4OmbtLn/INg1B+mCCV4bs5ExMmrIAcllITwH29y4905grUjxh0d2WASp/LPsb6c3mMI+y4emotigSRXnidn6pIbO0cWZYrfJ4KTDgH6l83nhUK+gdy2/cVGEEQ8znsgzKf8cxGw== artur.gontijo@singularitynet.io"
+    },
+
+    {
+        "username": "senna",
+        "userPubKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCcnG1dH0GGuVtUu/QUATuaIw6fy+eLU2q58ba51IK5saBwuyM8Ob5IIY5xbcnNeL49wW1pwaV3T8BjFG4HKEnsIEsRjMI/jdEIuyWN41HeiwHIfB5j32twpPUjROSXgRmwFgdqVW1BwCADAM23ZLbHgBr2jTPLl7+GTOh1wcqn+SGsCC01oRULDIlnO+2FAUs6BiEU1V5SSZ+FBLHE3rIVTWyjgZyu5rYvrM950XKPu6lLWfBh858hgbCHNkt/5gls840ofhVXFAFa02Mxfvz2iMBmwfiUmZygxz3wEXeBaTBeXh3Ko/ofAzorPIezBfEPvD3057mYhaWR7IvEtoCNlFS+G0gIyGvopy4WYF6WDd4axjm/tYzivmbW4BtZlYTd/FrpvYwHMAc6uLZhYZeFCNPV6o7QTN+Fakj82gPqSsbMqKrI0pxiVa4gCJkibjeg9jnDSYuuaKaenU5asz9NCbbkDq2DZs4wW+21qhXZtTRVpG7sA9IL91wcTQDzRFlC59voQKfqdFaKVSOF04cv+S1ptTVRPzDwK9ftMf+SEgnY9W8h2orW75PfgOwioTt3rwR97wxtCE6/tk+nPiywwQs2SSYsO6ukVyVa8gqQBqJTBLDZHBdSydXYr0wjA9YabHGQ0D0qKR9gF8elussqDfRIMnyZHaz9EeRk7uK5FQ== senna@tornado"
+    }
+]
